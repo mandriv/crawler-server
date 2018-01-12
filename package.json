@@ -1,0 +1,31 @@
+{
+  "name": "crawler-server",
+  "version": "1.0.0",
+  "description": "",
+  "main": "server.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "nodemon src/server.js --exec babel-node --presets=env"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/mandriv/crawler-server.git"
+  },
+  "author": "Wojciech Cichoradzki",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/mandriv/crawler-server/issues"
+  },
+  "homepage": "https://github.com/mandriv/crawler-server#readme",
+  "devDependencies": {
+    "babel-cli": "^6.26.0",
+    "babel-preset-env": "^1.6.1",
+    "eslint": "^4.15.0",
+    "eslint-config-airbnb-base": "^12.1.0",
+    "eslint-plugin-import": "^2.8.0"
+  },
+  "dependencies": {
+    "express": "^4.16.2",
+    "socket.io": "^2.0.4"
+  }
+}
