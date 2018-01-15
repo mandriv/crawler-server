@@ -28,7 +28,12 @@
     "eslint-plugin-import": "^2.8.0"
   },
   "dependencies": {
+    "accesscontrol": "^2.2.0",
+    "bcrypt": "^1.0.3",
+    "body-parser": "^1.18.2",
     "express": "^4.16.2",
+    "mongoose": "^4.13.9",
+    "morgan": "^1.9.0",
     "socket.io": "^2.0.4"
   }
 }
