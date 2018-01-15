@@ -20,6 +20,7 @@
   "homepage": "https://github.com/mandriv/crawler-server#readme",
   "devDependencies": {
     "babel-cli": "^6.26.0",
+    "babel-eslint": "^8.2.1",
     "babel-preset-env": "^1.6.1",
     "eslint": "^4.15.0",
     "eslint-config-airbnb-base": "^12.1.0",
