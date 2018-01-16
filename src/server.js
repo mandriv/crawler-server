@@ -19,6 +19,11 @@ app.use(bodyParser.json());
 // connect to MongoDB
 mongoose.Promise = global.Promise;
 mongoose.connect(config.MONGO_URI, {
+  user: config.MONGO_USERNAME,
+  pass: config.MONGO_PASSWORD,
+  auth: {
+    authdb: 'admin',
+  },
   useMongoClient: true,
   keepAlive: true,
 });
