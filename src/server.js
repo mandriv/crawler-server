@@ -6,14 +6,14 @@ import morgan from 'morgan';
 import bodyParser from 'body-parser';
 
 import * as config from './config/vars';
-import apiRouter from './apiRouter';
+import apiRouter from './util/apiRouter';
 
 const app = express();
 const server = http.Server(app);
 const io = new SocketIO(server);
 
 // midlleware
-app.use(morgan('dev'));
+app.use(morgan('dev')); // 'combined' for prod
 app.use(bodyParser.json());
 
 // connect to MongoDB

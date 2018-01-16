@@ -1,5 +1,7 @@
 import mongoose from 'mongoose';
 import bcrypt from 'bcrypt';
+import jwt from 'jsonwebtoken';
+
 import * as config from '../config/vars';
 
 /**
@@ -63,6 +65,16 @@ UserSchema.pre('save', function(done) {
 UserSchema.methods = {
   hashPassword(password, saltRounds = config.SALT_ROUNDS, cb) {
     return bcrypt.hash(password, saltRounds, cb);
+  },
+  authenticate(password) {
+    return bcrypt.compareSync(password, this.password);
+  },
+  generateToken() {
+    const payload = {
+      id: this.id,
+      role: this.role,
+    };
+    return jwt.sign(payload, config.JWT_SECRET, { expiresIn: '30d' });
   },
 };
 

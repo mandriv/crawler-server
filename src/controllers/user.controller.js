@@ -1,5 +1,6 @@
 import Controller from './controller';
 import User from '../models/user.model';
+import acl from '../util/acl';
 
 class UserController extends Controller {
 
@@ -12,19 +13,32 @@ class UserController extends Controller {
 
   // GET /user
   findAll = async (req, res, next) => {
-    try {
-      res.json(await User.find());
-    } catch (err) {
-      next(err);
+    const permission = acl.can(req.role).readAny('user');
+    if (permission.granted) {
+      try {
+        res.json(await User.find());
+      } catch (err) {
+        next(err);
+      }
+    } else {
+      res.status(403).end();
     }
   }
 
   // GET /user/:id
   findById = async (req, res, next) => {
-    try {
-      res.json(await User.findById(req.params.id));
-    } catch (err) {
-      next(err);
+    let permission;
+    if (req.userID === req.params.id) {
+      permission = acl.can(req.role).readOwn('user');
+    } else {
+      permission = acl.can(req.role).readAny('any');
+    }
+    if (permission.granted) {
+      try {
+        res.json(await User.findById(req.params.id));
+      } catch (err) {
+        next(err);
+      }
     }
   }
 
@@ -50,19 +64,33 @@ class UserController extends Controller {
     const { id } = req.params;
     const newAttributes = this.filterParams(req.body, this.whitelist);
 
-    try {
-      res.status(200).json(await User.findByIdAndUpdate(id, newAttributes, {
-        new: true,
-        runValidators: true,
-      }));
-    } catch (err) {
-      next(err);
+    let permission;
+    if (req.userID === id) {
+      permission = acl.can(req.role).readOwn('user');
+    } else {
+      permission = acl.can(req.role).readAny('any');
+    }
+
+    if (permission.granted) {
+      try {
+        res.status(200).json(await User.findByIdAndUpdate(id, newAttributes, {
+          new: true,
+          runValidators: true,
+        }));
+      } catch (err) {
+        next(err);
+      }
     }
   }
 
   assignRole = async (req, res, next) => {
     const { id, role } = req.params;
     const newRole = { role };
+
+    // only admins can assign roles
+    if (req.role !== 'admin') {
+      res.status(403).end();
+    }
 
     try {
       res.status(200).json(await User.findByIdAndUpdate(id, newRole, {
@@ -77,10 +105,19 @@ class UserController extends Controller {
   delete = async (req, res, next) => {
     const { id } = req.params;
 
-    try {
-      res.status(200).json(await User.findByIdAndRemove(id));
-    } catch (err) {
-      next(err);
+    let permission;
+    if (req.userID === id) {
+      permission = acl.can(req.role).deleteOwn('user');
+    } else {
+      permission = acl.can(req.role).deleteAny('any');
+    }
+
+    if (permission.granted) {
+      try {
+        res.status(200).json(await User.findByIdAndRemove(id));
+      } catch (err) {
+        next(err);
+      }
     }
   }
 
