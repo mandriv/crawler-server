@@ -4,6 +4,7 @@ import checkToken from '../middleware/checkToken';
 // controllers
 import UserController from '../controllers/user.controller';
 import LoginController from '../controllers/login.controller';
+import EmailController from '../controllers/email.controller';
 
 const routes = new Router();
 // Users
@@ -13,6 +14,8 @@ routes.post('/users', UserController.create);
 routes.put('/users/:id', checkToken, UserController.update);
 routes.put('/users/:id/role/:role', checkToken, UserController.assignRole);
 routes.delete('/users/:id', checkToken, UserController.delete);
+// Mailing
+routes.post('/users/:id/email', checkToken, EmailController.sendToId);
 // Login
 routes.post('/login', LoginController.login);
 
