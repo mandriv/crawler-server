@@ -1,6 +1,6 @@
 import dotenv from 'dotenv';
 
-export default function () {
+function envCheck() {
   // load variables
   dotenv.config();
 
@@ -12,6 +12,8 @@ export default function () {
     'MONGO_URI',
     'MONGO_USERNAME',
     'MONGO_PASSWORD',
+    'MAILGUN_DOMAIN',
+    'MAILGUN_API_KEY',
   ];
   let missingFieldError = false;
   requiredFields.forEach((field) => {
@@ -23,5 +25,9 @@ export default function () {
   if (missingFieldError) {
     console.error('Some enviroment variables are missing. Shutting down...');
     process.exit(1);
+  } else {
+    console.log('Env config ok...'); // eslint-disable-line
   }
 }
+
+export default envCheck();

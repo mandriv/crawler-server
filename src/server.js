@@ -8,9 +8,6 @@ import bodyParser from 'body-parser';
 import envCheck from './util/envCheck';
 import apiRouter from './util/apiRouter';
 
-// Environment vars check
-envCheck();
-
 const app = express();
 const server = http.Server(app);
 const io = new SocketIO(server);
