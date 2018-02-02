@@ -3,7 +3,13 @@ import AccessControl from 'accesscontrol';
 const grantsObject = {
   admin: {
     // user resource
-    user: {
+    users: {
+      'create:any': ['*'],
+      'read:any': ['*'],
+      'update:any': ['*'],
+      'delete:any': ['*'],
+    },
+    emailToUsers: {
       'create:any': ['*'],
       'read:any': ['*'],
       'update:any': ['*'],
@@ -11,8 +17,8 @@ const grantsObject = {
     },
   },
   user: {
-    // user resource
-    user: {
+    // users resource
+    users: {
       'create:any': ['*'],
       'read:own': ['*'],
       'update:own': ['*'],

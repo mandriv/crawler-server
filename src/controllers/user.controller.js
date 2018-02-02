@@ -13,7 +13,7 @@ class UserController extends Controller {
 
   // GET /user
   findAll = async (req, res, next) => {
-    const permission = acl.can(req.role).readAny('user');
+    const permission = acl.can(req.role).readAny('users');
     if (permission.granted) {
       try {
         res.json(await User.find());
@@ -29,9 +29,9 @@ class UserController extends Controller {
   findById = async (req, res, next) => {
     let permission;
     if (req.userID === req.params.id) {
-      permission = acl.can(req.role).readOwn('user');
+      permission = acl.can(req.role).readOwn('users');
     } else {
-      permission = acl.can(req.role).readAny('any');
+      permission = acl.can(req.role).readAny('users');
     }
     if (permission.granted) {
       try {
@@ -66,9 +66,9 @@ class UserController extends Controller {
 
     let permission;
     if (req.userID === id) {
-      permission = acl.can(req.role).readOwn('user');
+      permission = acl.can(req.role).readOwn('users');
     } else {
-      permission = acl.can(req.role).readAny('any');
+      permission = acl.can(req.role).readAny('users');
     }
 
     if (permission.granted) {
@@ -107,9 +107,9 @@ class UserController extends Controller {
 
     let permission;
     if (req.userID === id) {
-      permission = acl.can(req.role).deleteOwn('user');
+      permission = acl.can(req.role).deleteOwn('users');
     } else {
-      permission = acl.can(req.role).deleteAny('any');
+      permission = acl.can(req.role).deleteAny('users');
     }
 
     if (permission.granted) {

@@ -7,12 +7,12 @@ import LoginController from '../controllers/login.controller';
 
 const routes = new Router();
 // Users
-routes.get('/user', checkToken, UserController.findAll);
-routes.get('/user/:id', checkToken, UserController.findById);
-routes.post('/user', UserController.create);
-routes.put('/user/:id', checkToken, UserController.update);
-routes.put('/user/:id/role/:role', checkToken, UserController.assignRole);
-routes.delete('/user/:id', checkToken, UserController.delete);
+routes.get('/users', checkToken, UserController.findAll);
+routes.get('/users/:id', checkToken, UserController.findById);
+routes.post('/users', UserController.create);
+routes.put('/users/:id', checkToken, UserController.update);
+routes.put('/users/:id/role/:role', checkToken, UserController.assignRole);
+routes.delete('/users/:id', checkToken, UserController.delete);
 // Login
 routes.post('/login', LoginController.login);
 
