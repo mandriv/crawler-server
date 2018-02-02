@@ -51,8 +51,29 @@ class UserController extends Controller {
     });
 
     try {
+      // Save new user
       const savedUser = await newUser.save();
-      res.status(201).json(savedUser);
+      // Create new verification object and save it
+      const verification = new Verification({
+        token: Verification.generateToken(),
+        user: savedUser.id,
+      });
+      await verification.save();
+      // Compose an email to the user with verification link
+      const mail = {
+        from: 'Do not reply noreply@sheriff.ml',
+        to: savedUser.email,
+        subject: 'E-mail verification',
+        text: `Token: '${verification.token}', user id: '${savedUser.id}'`,
+      };
+      mg.messages().send(mail, async (error) => {
+        if (error) {
+          await User.findByIdAndRemove(savedUser.id);
+          await Verification.findByIdAndRemove(verification.id);
+          return res.status(500).json({ error: 'Could not send verification email' });
+        }
+        return res.status(201).json(savedUser);
+      });
     } catch (err) {
       err.status = 400;
       next(err);
@@ -117,6 +138,7 @@ class UserController extends Controller {
     }
 
     try {
+      await Verification.remove({ user: id }).exec();
       res.status(200).json(await User.findByIdAndRemove(id));
     } catch (err) {
       next(err);
@@ -131,9 +153,38 @@ class UserController extends Controller {
     }
 
     try {
+      await Verification.remove({});
       res.status(200).json(await User.remove({}));
     } catch (err) {
       next(err);
+    }
+  }
+
+  verifyEmail = async (req, res, next) => {
+    const { token } = req.body;
+    if (!token) {
+      return res.status(400).json({
+        error: 'Token field is missing from request body!',
+      });
+    }
+
+    let verification;
+    try {
+      verification = await Verification.findOneAndRemove({ token });
+      if (!verification) {
+        return res.status(400).json({
+          error: 'Bad verification token!',
+        });
+      }
+      const id = verification.user;
+      return res.status(200).json(await User.findByIdAndUpdate(id, {
+        verified: true,
+      }, {
+        new: true,
+        runValidators: true,
+      }));
+    } catch (error) {
+      next(error);
     }
   }
 
