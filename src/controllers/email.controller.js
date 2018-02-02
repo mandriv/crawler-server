@@ -5,8 +5,8 @@ import User from '../models/user.model';
 import acl from '../util/acl';
 
 const mg = Mailgun({
-  domain: 'sandboxe8071a543e4340f98fe55fefd47122f8.mailgun.org',
-  apiKey: 'key-8f2c4834eb63d64cb9d2de947d127f50',
+  domain: process.env.MAILGUN_DOMAIN,
+  apiKey: process.env.MAILGUN_API_KEY,
 });
 
 class EmailController extends Controller {
@@ -82,12 +82,11 @@ class EmailController extends Controller {
         text: params.text,
       };
 
-      console.log(reqBody);
-
       mg.messages().send(reqBody, (error, body) => {
-        console.log(error);
-        console.log(body);
-        return res.send(body)
+        if (error) {
+          return res.status(500).json({ err: true, msg: error });
+        }
+        return res.status(200).json({ err: false, msg: body });
       });
     } catch (err) {
       next(err);
