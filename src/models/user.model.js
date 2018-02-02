@@ -2,8 +2,6 @@ import mongoose from 'mongoose';
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
 
-import * as config from '../config/vars';
-
 /**
  * User Schema
  */
@@ -52,7 +50,7 @@ UserSchema.set('toJSON', {
 UserSchema.pre('save', function(done) {
   // Encrypt password before saving the document
   if (this.isModified('password')) {
-    const saltRounds = config.SALT_ROUNDS;
+    const saltRounds = process.env.SALT_ROUNDS;
     this.hashPassword(this.password, saltRounds, (err, hash) => {
       this.password = hash;
       done();
@@ -63,7 +61,7 @@ UserSchema.pre('save', function(done) {
 });
 
 UserSchema.methods = {
-  hashPassword(password, saltRounds = config.SALT_ROUNDS, cb) {
+  hashPassword(password, saltRounds = process.env.SALT_ROUNDS, cb) {
     return bcrypt.hash(password, saltRounds, cb);
   },
   authenticate(password) {
@@ -74,7 +72,7 @@ UserSchema.methods = {
       id: this.id,
       role: this.role,
     };
-    return jwt.sign(payload, config.JWT_SECRET, { expiresIn: '30d' });
+    return jwt.sign(payload, process.env.JWT_SECRET, { expiresIn: '30d' });
   },
 };
 

@@ -5,8 +5,11 @@ import SocketIO from 'socket.io';
 import morgan from 'morgan';
 import bodyParser from 'body-parser';
 
-import * as config from './config/vars';
+import envCheck from './util/envCheck';
 import apiRouter from './util/apiRouter';
+
+// Environment vars check
+envCheck();
 
 const app = express();
 const server = http.Server(app);
@@ -18,9 +21,9 @@ app.use(bodyParser.json());
 
 // connect to MongoDB
 mongoose.Promise = global.Promise;
-mongoose.connect(config.MONGO_URI, {
-  user: config.MONGO_USERNAME,
-  pass: config.MONGO_PASSWORD,
+mongoose.connect(process.env.MONGO_URI, {
+  user: process.env.MONGO_USERNAME,
+  pass: process.env.MONGO_PASSWORD,
   auth: {
     authdb: 'admin',
   },
@@ -30,18 +33,19 @@ mongoose.connect(config.MONGO_URI, {
 
 const db = mongoose.connection;
 
-db.on('error', (err) => {
-  console.error(err);
+db.on('error', () => {
+  console.error('Failed to connect to database!');
 });
 db.once('open', () => {
   console.log('Successfully connected to database...'); // eslint-disable-line
-  server.listen(config.PORT, () => {
-    console.log(`Magic is happening on port ${config.PORT}!`); // eslint-disable-line
+  const port = process.env.PORT;
+  server.listen(port, () => {
+    console.log(`Magic is happening on port ${port}!`); // eslint-disable-line
   });
 });
 
 // routes
-app.use(config.API_PREFIX, apiRouter);
+app.use('/', apiRouter);
 
 // sockets
 io.on('connection', (socket) => {

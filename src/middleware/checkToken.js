@@ -1,11 +1,10 @@
 import jwt from 'jsonwebtoken';
-import * as config from '../config/vars';
 
 export default function checkToken(req, res, next) {
   if (req.headers.authorization) {
     const token = req.headers.authorization.split(' ')[1]; // get rid of "Bearer "
 
-    jwt.verify(token, config.JWT_SECRET, (err, decoded) => {
+    jwt.verify(token, process.env.JWT_SECRET, (err, decoded) => {
       if (err) {
         res.status(401).json({ err: true, msg: err.message });
       } else {
