@@ -112,12 +112,28 @@ class UserController extends Controller {
       permission = acl.can(req.role).deleteAny('users');
     }
 
-    if (permission.granted) {
-      try {
-        res.status(200).json(await User.findByIdAndRemove(id));
-      } catch (err) {
-        next(err);
-      }
+    if (!permission.granted) {
+      return res.status(403).json({ err: true, msg: 'Insufficient permissions' });
+    }
+
+    try {
+      res.status(200).json(await User.findByIdAndRemove(id));
+    } catch (err) {
+      next(err);
+    }
+  }
+
+  deleteAll = async (req, res, next) => {
+    const permission = acl.can(req.role).deleteAny('users');
+
+    if (!permission.granted) {
+      return res.status(403).json({ err: true, msg: 'Insufficient permissions' });
+    }
+
+    try {
+      res.status(200).json(await User.remove({}));
+    } catch (err) {
+      next(err);
     }
   }
 

@@ -14,6 +14,7 @@ routes.post('/users', UserController.create);
 routes.put('/users/:id', checkToken, UserController.update);
 routes.put('/users/:id/role/:role', checkToken, UserController.assignRole);
 routes.delete('/users/:id', checkToken, UserController.delete);
+routes.delete('/users', checkToken, UserController.deleteAll);
 // Mailing
 routes.post('/users/:id/email', checkToken, EmailController.sendToId);
 // Login
