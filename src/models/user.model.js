@@ -54,8 +54,11 @@ UserSchema.set('toJSON', {
 UserSchema.pre('save', function(done) {
   // Encrypt password before saving the document
   if (this.isModified('password')) {
-    const saltRounds = process.env.SALT_ROUNDS;
+    const saltRounds = parseInt(process.env.SALT_ROUNDS, 10);
     this.hashPassword(this.password, saltRounds, (err, hash) => {
+      if (err) {
+        throw new Error(err);
+      }
       this.password = hash;
       done();
     });
