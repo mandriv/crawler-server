@@ -28,6 +28,10 @@ const UserSchema = new Schema({
     default: 'user',
     required: true,
   },
+  institution: {
+    type: Schema.Types.ObjectId,
+    ref: 'Institution',
+  },
 }, {
   timestamps: true,
   strict: true,
