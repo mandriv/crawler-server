@@ -8,5 +8,6 @@ module.exports = {
         "switches": "never",
         "blocks": "never",
       }],
+      "consistent-return" : 0,
     },
 };
