@@ -1,7 +1,7 @@
 import mongoose from 'mongoose';
 
 /**
- * User Schema
+ * Institution Schema
  */
 
 const { Schema } = mongoose;

@@ -1,6 +1,8 @@
 import Controller from './controller';
 import User from '../models/user.model';
+import Verification from '../models/verification.model';
 import acl from '../util/acl';
+import mg from '../util/mailgun';
 
 class UserController extends Controller {
 
@@ -8,20 +10,18 @@ class UserController extends Controller {
     'name',
     'email',
     'password',
-    'joined',
   ];
 
   // GET /user
   findAll = async (req, res, next) => {
-    const permission = acl.can(req.role).readAny('users');
-    if (permission.granted) {
-      try {
-        res.json(await User.find());
-      } catch (err) {
-        next(err);
-      }
-    } else {
-      res.status(403).end();
+    const permission = acl.can(req.roles).readAny('users');
+    if (!permission.granted) {
+      return res.status(403).json({ error: 'Insufficient permissions!' });
+    }
+    try {
+      res.json(await User.find());
+    } catch (err) {
+      next(err);
     }
   }
 
@@ -29,16 +29,17 @@ class UserController extends Controller {
   findById = async (req, res, next) => {
     let permission;
     if (req.userID === req.params.id) {
-      permission = acl.can(req.role).readOwn('users');
+      permission = acl.can(req.roles).readOwn('users');
     } else {
-      permission = acl.can(req.role).readAny('users');
+      permission = acl.can(req.roles).readAny('users');
     }
-    if (permission.granted) {
-      try {
-        res.json(await User.findById(req.params.id));
-      } catch (err) {
-        next(err);
-      }
+    if (!permission.granted) {
+      return res.status(403).json({ error: 'Insufficient permissions!' });
+    }
+    try {
+      res.json(await User.findById(req.params.id));
+    } catch (err) {
+      next(err);
     }
   }
 
@@ -87,20 +88,22 @@ class UserController extends Controller {
 
     let permission;
     if (req.userID === id) {
-      permission = acl.can(req.role).readOwn('users');
+      permission = acl.can(req.roles).readOwn('users');
     } else {
-      permission = acl.can(req.role).readAny('users');
+      permission = acl.can(req.roles).readAny('users');
     }
 
-    if (permission.granted) {
-      try {
-        res.status(200).json(await User.findByIdAndUpdate(id, newAttributes, {
-          new: true,
-          runValidators: true,
-        }));
-      } catch (err) {
-        next(err);
-      }
+    if (!permission.granted) {
+      return res.status(403).json({ error: 'Insufficient permissions!' });
+    }
+
+    try {
+      res.status(200).json(await User.findByIdAndUpdate(id, newAttributes, {
+        new: true,
+        runValidators: true,
+      }));
+    } catch (err) {
+      next(err);
     }
   }
 
@@ -109,8 +112,8 @@ class UserController extends Controller {
     const newRole = { role };
 
     // only admins can assign roles
-    if (req.role !== 'admin') {
-      res.status(403).end();
+    if (req.roles !== 'admin') {
+      return res.status(403).json({ error: 'Insufficient permissions!' });
     }
 
     try {
@@ -128,9 +131,9 @@ class UserController extends Controller {
 
     let permission;
     if (req.userID === id) {
-      permission = acl.can(req.role).deleteOwn('users');
+      permission = acl.can(req.roles).deleteOwn('users');
     } else {
-      permission = acl.can(req.role).deleteAny('users');
+      permission = acl.can(req.roles).deleteAny('users');
     }
 
     if (!permission.granted) {
@@ -146,7 +149,7 @@ class UserController extends Controller {
   }
 
   deleteAll = async (req, res, next) => {
-    const permission = acl.can(req.role).deleteAny('users');
+    const permission = acl.can(req.roles).deleteAny('users');
 
     if (!permission.granted) {
       return res.status(403).json({ err: true, msg: 'Insufficient permissions' });

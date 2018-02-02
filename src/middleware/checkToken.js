@@ -9,7 +9,7 @@ export default function checkToken(req, res, next) {
         res.status(401).json({ err: true, msg: err.message });
       } else {
         req.userID = decoded.id;
-        req.role = decoded.role;
+        req.roles = decoded.roles;
         next();
       }
     });

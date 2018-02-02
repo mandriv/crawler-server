@@ -22,15 +22,20 @@ const UserSchema = new Schema({
     type: String,
     required: [true, 'Password is required'],
   },
-  role: {
-    type: String,
+  roles: {
+    type: Array,
     enum: ['user', 'admin'],
-    default: 'user',
+    default: ['user'],
     required: true,
   },
   institution: {
     type: Schema.Types.ObjectId,
     ref: 'Institution',
+  },
+  verified: {
+    type: Boolean,
+    default: false,
+    required: true,
   },
 }, {
   timestamps: true,
@@ -77,7 +82,7 @@ UserSchema.methods = {
   generateToken() {
     const payload = {
       id: this.id,
-      role: this.role,
+      roles: this.roles,
     };
     return jwt.sign(payload, process.env.JWT_SECRET, { expiresIn: '30d' });
   },
