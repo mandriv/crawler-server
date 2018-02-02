@@ -1,13 +1,7 @@
-import Mailgun from 'mailgun-js';
-
 import Controller from './controller';
 import User from '../models/user.model';
 import acl from '../util/acl';
-
-const mg = Mailgun({
-  domain: process.env.MAILGUN_DOMAIN,
-  apiKey: process.env.MAILGUN_API_KEY,
-});
+import mg from '../util/mailgun';
 
 class EmailController extends Controller {
 
