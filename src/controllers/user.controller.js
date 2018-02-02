@@ -137,7 +137,7 @@ class UserController extends Controller {
     }
 
     if (!permission.granted) {
-      return res.status(403).json({ err: true, msg: 'Insufficient permissions' });
+      return res.status(403).json({ error: 'Insufficient permissions!' });
     }
 
     try {
@@ -152,7 +152,7 @@ class UserController extends Controller {
     const permission = acl.can(req.roles).deleteAny('users');
 
     if (!permission.granted) {
-      return res.status(403).json({ err: true, msg: 'Insufficient permissions' });
+      return res.status(403).json({ error: 'Insufficient permissions' });
     }
 
     try {
@@ -166,18 +166,14 @@ class UserController extends Controller {
   verifyEmail = async (req, res, next) => {
     const { token } = req.body;
     if (!token) {
-      return res.status(400).json({
-        error: 'Token field is missing from request body!',
-      });
+      return res.status(400).json({ error: 'Token field is missing from request body!' });
     }
 
     let verification;
     try {
       verification = await Verification.findOneAndRemove({ token });
       if (!verification) {
-        return res.status(400).json({
-          error: 'Bad verification token!',
-        });
+        return res.status(400).json({ error: 'Bad verification token!' });
       }
       const id = verification.user;
       return res.status(200).json(await User.findByIdAndUpdate(id, {
