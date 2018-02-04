@@ -3,7 +3,7 @@ import { Router } from 'express';
 import checkToken from '../middleware/checkToken';
 // controllers
 import UserController from '../controllers/user.controller';
-import LoginController from '../controllers/login.controller';
+import AuthController from '../controllers/auth.controller';
 import EmailController from '../controllers/email.controller';
 
 const routes = new Router();
@@ -20,6 +20,7 @@ routes.put('/users/:id/verify', UserController.verifyEmail);
 routes.post('/users/:id/email', checkToken, EmailController.sendToId);
 
 // Login
-routes.post('/login', LoginController.login);
+routes.post('/login', AuthController.login);
+routes.get('/auth', checkToken, AuthController.authenticate);
 
 export default routes;
