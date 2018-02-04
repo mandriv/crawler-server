@@ -6,7 +6,7 @@ export default function checkToken(req, res, next) {
 
     jwt.verify(token, process.env.JWT_SECRET, (err, decoded) => {
       if (err) {
-        res.status(401).json({ err: true, msg: err.message });
+        res.status(401).json({ error: err.message });
       } else {
         req.userID = decoded.id;
         req.roles = decoded.roles;
@@ -14,6 +14,6 @@ export default function checkToken(req, res, next) {
       }
     });
   } else {
-    res.status(401).send({ err: true, msg: 'No token provided' });
+    res.status(401).send({ error: 'No token provided' });
   }
 }
