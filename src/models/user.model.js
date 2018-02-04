@@ -1,6 +1,7 @@
 import mongoose from 'mongoose';
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
+import beautifyUnique from 'mongoose-beautiful-unique-validation';
 
 /**
  * User Schema
@@ -10,17 +11,17 @@ const { Schema } = mongoose;
 const UserSchema = new Schema({
   name: {
     type: String,
-    required: [true, 'Full name is required'],
+    required: 'Full name is required',
   },
   email: {
     type: String,
-    unique: true,
-    required: [true, 'Email address is required'],
+    unique: '{VALUE} email address already in use',
+    required: 'Email address is required',
     match: [/^([\w-\.]+@([\w-]+\.)+[\w-]{2,4})?$/, 'Email address is invalid'], // eslint-disable-line
   },
   password: {
     type: String,
-    required: [true, 'Password is required'],
+    required: 'Password is required',
   },
   roles: {
     type: Array,
@@ -42,14 +43,21 @@ const UserSchema = new Schema({
   strict: true,
 });
 
+// Add validation plugin
+UserSchema.plugin(beautifyUnique);
+
 // Strip out password field when sending user object to client
 UserSchema.set('toJSON', {
   virtuals: true,
   transform(doc, obj) {
-    obj.id = obj._id; // eslint-disable-line
-    delete obj._id; // eslint-disable-line
-    delete obj.__v; // eslint-disable-line
-    delete obj.password; // eslint-disable-line
+    /* eslint-disable */
+    obj.id = obj._id;
+    delete obj._id;
+    delete obj.__v;
+    delete obj.password;
+    delete obj.createdAt;
+    delete obj.updatedAt;
+    /* eslint-enable */
     return obj;
   },
 });
