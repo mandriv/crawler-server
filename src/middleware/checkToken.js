@@ -10,6 +10,7 @@ export default function checkToken(req, res, next) {
       } else {
         req.userID = decoded.id;
         req.roles = decoded.roles;
+        req.institutionID = decoded.institution;
         next();
       }
     });

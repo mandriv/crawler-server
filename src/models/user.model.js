@@ -91,6 +91,7 @@ UserSchema.methods = {
     const payload = {
       id: this.id,
       roles: this.roles,
+      institution: this.institution,
     };
     return jwt.sign(payload, process.env.JWT_SECRET, { expiresIn: '30d' });
   },
