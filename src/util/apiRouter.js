@@ -5,6 +5,7 @@ import checkToken from '../middleware/checkToken';
 import UserController from '../controllers/user.controller';
 import AuthController from '../controllers/auth.controller';
 import EmailController from '../controllers/email.controller';
+import CrawlersController from '../controllers/crawlers.controller';
 
 const routes = new Router();
 // Users
@@ -22,5 +23,14 @@ routes.post('/users/:id/email', checkToken, EmailController.sendToId);
 // Login
 routes.post('/login', AuthController.login);
 routes.get('/auth', checkToken, AuthController.authenticate);
+
+// Crawlers
+routes.get('/crawlers', checkToken, CrawlersController.findAll);
+routes.get('/crawlers/:id', checkToken, CrawlersController.findById);
+routes.post('/crawlers', checkToken, CrawlersController.create);
+routes.put('/crawlers/:id', checkToken, CrawlersController.update);
+routes.put('/crawlers/:id/user/:uid', checkToken, CrawlersController.assignUser);
+routes.patch('/crawlers/:id/user/:uid/remove', checkToken, CrawlersController.deassignUser);
+routes.get('/crawlers/user/:id', checkToken, CrawlersController.findByUserId);
 
 export default routes;
