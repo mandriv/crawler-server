@@ -76,8 +76,13 @@ class UserController extends Controller {
         return res.status(201).json(savedUser);
       });
     } catch (err) {
+      if (err.errrors) {
+        return res.status(400).json({
+          error: Object.values(err.errors)[0].message,
+        });
+      }
       return res.status(400).json({
-        error: Object.values(err.errors)[0].message,
+        error: err,
       });
     }
   }
