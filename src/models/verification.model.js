@@ -12,10 +12,10 @@ const VerificationSchema = new Schema({
     type: String,
     required: [true, 'Token is required'],
   },
-  user: [{
+  user: {
     type: Schema.Types.ObjectId,
     ref: 'User',
-  }],
+  },
 }, {
   timestamps: true,
   strict: true,
