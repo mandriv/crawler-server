@@ -46,10 +46,8 @@ app.use('/', apiRouter);
 
 // sockets
 io.on('connection', (socket) => {
-  console.log('someone connected');
-  socket.emit('message', 'welcome');
-  socket.on('message', (data) => {
-    console.log(data);
+  socket.on('robot-control', (data) => {
+    socket.broadcast.emit('robot-control', data);
   });
 });
 
