@@ -7,6 +7,7 @@ import bodyParser from 'body-parser';
 
 import envCheck from './util/envCheck';
 import apiRouter from './util/apiRouter';
+import assignIP from './middleware/assignIP';
 
 import RoomsPool from './sockets/RoomsPool';
 import Room from './sockets/Room';
@@ -16,8 +17,9 @@ const server = http.Server(app);
 const io = new SocketIO(server);
 
 // midlleware
-app.use(morgan('combined'));
 app.use(bodyParser.json());
+app.use(assignIP);
+app.use(morgan('combined'));
 
 // connect to MongoDB
 mongoose.Promise = global.Promise;
