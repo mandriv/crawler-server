@@ -7,7 +7,6 @@ import bodyParser from 'body-parser';
 
 import envCheck from './util/envCheck'; // eslint-disable-line
 import apiRouter from './util/apiRouter';
-import assignIP from './middleware/assignIP';
 
 import RoomsPool from './sockets/RoomsPool';
 import Room from './sockets/Room';
@@ -16,9 +15,11 @@ const app = express();
 const server = http.Server(app);
 const io = new SocketIO(server);
 
+// settings
+app.set('trust proxy', true);
+
 // midlleware
 app.use(bodyParser.json());
-app.use(assignIP);
 app.use(morgan('combined'));
 
 // connect to MongoDB
