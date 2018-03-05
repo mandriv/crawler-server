@@ -16,7 +16,7 @@ const server = http.Server(app);
 const io = new SocketIO(server);
 
 // midlleware
-app.use(morgan('dev')); // 'combined' for prod
+app.use(morgan('combined'));
 app.use(bodyParser.json());
 
 // connect to MongoDB
