@@ -8,6 +8,9 @@ import bodyParser from 'body-parser';
 import envCheck from './util/envCheck';
 import apiRouter from './util/apiRouter';
 
+import RoomsPool from './sockets/RoomsPool';
+import Room from './sockets/Room';
+
 const app = express();
 const server = http.Server(app);
 const io = new SocketIO(server);
@@ -44,10 +47,59 @@ db.once('open', () => {
 // routes
 app.use('/', apiRouter);
 
-// sockets
+// sockets.io handling
+const Pool = new RoomsPool();
+
 io.on('connection', (socket) => {
+  // Robot join
+  socket.on('robot-join', (robot) => {
+    console.log('Robot joined!', robot);
+    socket.isRobot = true; // eslint-disable-line
+    socket.robot = robot; // eslint-disable-line
+    const roomName = `control-${robot.id}`;
+    let newRoom = Pool.getRoomByName(roomName);
+    if (!newRoom) {
+      newRoom = new Room(roomName);
+    }
+    newRoom.joinRobot(robot);
+    Pool.createRoom(newRoom);
+    socket.join(roomName);
+  });
+  // User join
+  socket.on('user-join', (roomName, user) => {
+    console.log('User joined!', roomName, user);
+    socket.isRobot = false; // eslint-disable-line
+    socket.user = user; // eslint-disable-line
+    const room = Pool.getRoomByName(roomName);
+    if (room) {
+      room.joinUser(user);
+      socket.join(roomName);
+    } else {
+      socket.emit('user-join-failed', 'Incorrect room name!');
+    }
+  });
+  // List rooms
+  socket.on('request-rooms-list', () => {
+    if (!socket.isRobot) {
+      socket.emit('rooms-list', Pool.getRooms(socket.user));
+    }
+  });
+  // Send control data
   socket.on('robot-control', (data) => {
-    socket.broadcast.emit('robot-control', data);
+    io.sockets.in(socket.room).emit('robot-control', data);
+  });
+  // Disconnect
+  socket.on('disconnect', () => {
+    let room;
+    if (socket.isRobot) {
+      room = Pool.findRobotsRoom(socket.robot);
+    } else {
+      room = Pool.findUsersRoom(socket.user);
+    }
+    if (room.isEmpty()) {
+      Pool.removeRoomById(room.id);
+    }
+    socket.leave(socket.room.name);
   });
 });
 
