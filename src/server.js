@@ -5,7 +5,7 @@ import SocketIO from 'socket.io';
 import morgan from 'morgan';
 import bodyParser from 'body-parser';
 
-import envCheck from './util/envCheck';
+import envCheck from './util/envCheck'; // eslint-disable-line
 import apiRouter from './util/apiRouter';
 import assignIP from './middleware/assignIP';
 
