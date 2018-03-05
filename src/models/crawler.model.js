@@ -1,5 +1,6 @@
 import mongoose from 'mongoose';
 import uuidv4 from 'uuid/v4';
+import bcrypt from 'bcrypt';
 
 /**
  * Institution Schema
@@ -29,7 +30,31 @@ const CrawlerSchema = new Schema({
   strict: true,
 });
 
+// Use plain old function due to "this" usage
+// eslint-disable-next-line
+CrawlerSchema.pre('save', function(done) {
+  // Encrypt password before saving the document
+  if (this.isModified('key')) {
+    const saltRounds = parseInt(process.env.SALT_ROUNDS, 10);
+    this.hashKey(this.key, saltRounds, (err, hash) => {
+      if (err) {
+        throw new Error(err);
+      }
+      this.key = hash;
+      done();
+    });
+  } else {
+    done();
+  }
+});
+
 CrawlerSchema.statics = {
+  hashKey(key, saltRounds = process.env.SALT_ROUNDS, cb) {
+    return bcrypt.hash(key, saltRounds, cb);
+  },
+  authenticate(key) {
+    return bcrypt.compareSync(key, this.password);
+  },
   generateKey() {
     return uuidv4();
   },
