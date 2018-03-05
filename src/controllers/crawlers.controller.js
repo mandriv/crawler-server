@@ -154,6 +154,10 @@ class CrawlersController extends Controller {
         return res.status(400).json({ error: `Could not find crawler id: ${id}` });
       }
       if (body.key === crawler.key) {
+        const isAlreadyUser = crawler.owner.find(onwer => onwer.id === user.id && owner.type === 'User');
+        if (isAlreadyUser) {
+          return res.status(200).json(crawler);
+        }
         const newOwners = {
           owners: [...crawler.owners, {
             type: 'User',
