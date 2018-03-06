@@ -69,22 +69,39 @@ io.on('connection', (socket) => {
     socket.join(roomName);
   });
   // User join
-  socket.on('user-join', (roomName, user) => {
-    console.log('User joined!', roomName, user);
+  socket.on('user-join', (user) => {
+    console.log('User joined!', user);
+    if (!user) {
+      socket.emit('user-join-fail', 'You need to pass user object!');
+      return;
+    }
     socket.isRobot = false; // eslint-disable-line
     socket.user = user; // eslint-disable-line
+  });
+  // List rooms
+  socket.on('request-room-list', () => {
+    console.log('Requesting room list');
+    if (!socket.isRobot && socket.user) {
+      console.log('sending room list');
+      socket.emit('room-list', Pool.getAvailableRooms(socket.user));
+    } else {
+      console.log('sending error with room list');
+      socket.emit('request-room-fail', 'Send \'user-join\' request first!');
+    }
+  });
+  // User join room
+  socket.on('user-join-room', (roomName) => {
+    if (!socket.user) {
+      socket.emit('user-join-room-fail', 'Send \'user-join\' request first!');
+      return;
+    }
     const room = Pool.getRoomByName(roomName);
     if (room) {
       room.joinUser(user);
       socket.join(roomName);
+      console.log(`user joined room: ${roomName}`);
     } else {
-      socket.emit('user-join-failed', 'Incorrect room name!');
-    }
-  });
-  // List rooms
-  socket.on('request-rooms-list', () => {
-    if (!socket.isRobot) {
-      socket.emit('rooms-list', Pool.getRooms(socket.user));
+      socket.emit('user-join-room-fail', 'Incorrect room name!');
     }
   });
   // Send control data
@@ -99,10 +116,10 @@ io.on('connection', (socket) => {
     } else {
       room = Pool.findUsersRoom(socket.user);
     }
-    if (room.isEmpty()) {
+    if (room && room.isEmpty()) {
       Pool.removeRoomById(room.id);
+      socket.leave(socket.room.name);
     }
-    socket.leave(socket.room.name);
   });
 });
 
