@@ -23,6 +23,7 @@ routes.post('/users/:id/email', checkToken, EmailController.sendToId);
 // Login
 routes.post('/login', AuthController.login);
 routes.get('/auth', checkToken, AuthController.authenticate);
+routes.post('/crawlers/login', AuthController.loginCrawler);
 
 // Crawlers
 routes.get('/crawlers', checkToken, CrawlersController.findAll);

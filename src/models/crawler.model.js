@@ -1,6 +1,7 @@
 import mongoose from 'mongoose';
 import uuidv4 from 'uuid/v4';
 import bcrypt from 'bcrypt';
+import jwt from 'jsonwebtoken';
 
 /**
  * Institution Schema
@@ -57,6 +58,12 @@ CrawlerSchema.statics = {
   },
   generateKey() {
     return uuidv4();
+  },
+  generateToken() {
+    const payload = {
+      id: this.id,
+    };
+    return jwt.sign(payload, process.env.JWT_SECRET, { expiresIn: '30d' });
   },
 };
 
