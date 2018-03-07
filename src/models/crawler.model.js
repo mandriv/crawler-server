@@ -66,21 +66,24 @@ CrawlerSchema.pre('save', function(done) {
   }
 });
 
-CrawlerSchema.statics = {
+CrawlerSchema.methods = {
   hashKey(key, saltRounds = process.env.SALT_ROUNDS, cb) {
     return bcrypt.hash(key, saltRounds, cb);
   },
   authenticate(key) {
-    return bcrypt.compareSync(key, this.password);
-  },
-  generateKey() {
-    return uuidv4();
+    return bcrypt.compareSync(key, this.key);
   },
   generateToken() {
     const payload = {
       id: this.id,
     };
     return jwt.sign(payload, process.env.JWT_SECRET, { expiresIn: '30d' });
+  },
+};
+
+CrawlerSchema.statics = {
+  generateKey() {
+    return uuidv4();
   },
 };
 
