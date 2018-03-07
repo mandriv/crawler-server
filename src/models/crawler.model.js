@@ -31,6 +31,22 @@ const CrawlerSchema = new Schema({
   strict: true,
 });
 
+// Strip out password field when sending user object to client
+CrawlerSchema.set('toJSON', {
+  virtuals: true,
+  transform(doc, obj) {
+    /* eslint-disable */
+    obj.id = obj._id;
+    delete obj._id;
+    delete obj.__v;
+    delete obj.key;
+    delete obj.createdAt;
+    delete obj.updatedAt;
+    /* eslint-enable */
+    return obj;
+  },
+});
+
 // Use plain old function due to "this" usage
 // eslint-disable-next-line
 CrawlerSchema.pre('save', function(done) {
