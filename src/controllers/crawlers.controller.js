@@ -69,14 +69,14 @@ class CrawlersController extends Controller {
     }
 
     // Create new crawler
-    const crawler = new Crawler({
-      key: Crawler.generateKey(),
-    });
+    const key = Crawler.generateKey();
+    const crawler = new Crawler({ key });
 
     try {
       // Save new crawler
       const savedCrawler = await crawler.save();
-      return res.status(201).json(savedCrawler);
+      const { id } = savedCrawler;
+      return res.status(201).json({ id, key });
     } catch (err) {
       if (err.errrors) {
         return res.status(400).json({
