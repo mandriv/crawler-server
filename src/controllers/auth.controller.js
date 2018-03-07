@@ -46,7 +46,7 @@ class AuthController extends Controller {
 
   // POST /login
   loginCrawler = async (req, res, next) => {
-    const params = this.filterParams(req.body, ['id, key']);
+    const params = this.filterParams(req.body, ['id', 'key']);
     if (!params.id) {
       return res.status(400).json({ error: 'Id is required' });
     }
@@ -54,7 +54,7 @@ class AuthController extends Controller {
       return res.status(400).json({ error: 'Key is required' });
     }
     try {
-      const crawler = await Crawler.findById(req.params.id);
+      const crawler = await Crawler.findById(params.id);
       if (!crawler || !crawler.authenticate(params.key)) {
         return res.status(401).json({ error: 'Invalid id or key' });
       }
