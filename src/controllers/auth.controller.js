@@ -34,7 +34,11 @@ class AuthController extends Controller {
   authenticate = async (req, res, next) => {
     const { userID } = req;
     try {
-      res.json(await User.findById(userID));
+      const user = await User.findById(userID);
+      if (!user) {
+        return res.status(401).json({ error: 'Could not authenticate you' });
+      }
+      return res.status(200).json({ user });
     } catch (err) {
       next(err);
     }
