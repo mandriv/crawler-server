@@ -150,26 +150,23 @@ class CrawlersController extends Controller {
         return res.status(400).json({ error: `Could not find user id: ${uid}` });
       }
       const crawler = await Crawler.findById(id);
-      if (!crawler) {
-        return res.status(400).json({ error: `Could not find crawler id: ${id}` });
+      if (!crawler || !crawler.authenticate(body.key)) {
+        return res.status(401).json({ error: 'Invalid crawler\'s id or key' });
       }
-      if (body.key === crawler.key) {
-        const isAlreadyUser = crawler.owner.find(onwer => onwer.id === user.id && owner.type === 'User');
-        if (isAlreadyUser) {
-          return res.status(200).json(crawler);
-        }
-        const newOwners = {
-          owners: [...crawler.owners, {
-            type: 'User',
-            id: user.id,
-          }],
-        };
-        return res.status(200).json(await Crawler.findByIdAndUpdate(id, newOwners, {
-          new: true,
-          runValidators: true,
-        }));
+      const isAlreadyUser = crawler.owners.find(onwer => onwer.id === user.id && owner.type === 'User');
+      if (isAlreadyUser) {
+        return res.status(200).json(crawler);
       }
-      return res.status(400).json({ error: 'Invalid key!' });
+      const newOwners = {
+        owners: [...crawler.owners, {
+          type: 'User',
+          id: user.id,
+        }],
+      };
+      return res.status(200).json(await Crawler.findByIdAndUpdate(id, newOwners, {
+        new: true,
+        runValidators: true,
+      }));
     } catch (err) {
       next(err);
     }
