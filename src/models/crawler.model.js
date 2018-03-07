@@ -51,6 +51,7 @@ CrawlerSchema.set('toJSON', {
 // eslint-disable-next-line
 CrawlerSchema.pre('save', function(done) {
   // Encrypt password before saving the document
+  if (!this.name) this.name = `Crawler-${this.id}`;
   if (this.isModified('key')) {
     const saltRounds = parseInt(process.env.SALT_ROUNDS, 10);
     this.hashKey(this.key, saltRounds, (err, hash) => {
