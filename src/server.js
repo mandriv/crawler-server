@@ -56,7 +56,7 @@ const Pool = new RoomsPool();
 io.on('connection', (socket) => {
   // Robot join
   socket.on('robot-join', (robot) => {
-    console.log('Robot joined!', robot);
+    console.log(`Robot ${robot.id} joined!`);
     socket.isRobot = true; // eslint-disable-line
     socket.robot = robot; // eslint-disable-line
     const roomName = `control-${robot.id}`;
@@ -67,20 +67,20 @@ io.on('connection', (socket) => {
     newRoom.joinRobot(robot);
     Pool.createRoom(newRoom);
     socket.join(roomName);
+    socket.broadcast.emit('room-list-update');
   });
   // User join
   socket.on('user-join', (user) => {
-    console.log('User joined!', user);
     if (!user) {
       socket.emit('user-join-fail', 'You need to pass user object!');
       return;
     }
-    socket.isRobot = false; // eslint-disable-line
+    console.log(`User ${user.id} joined!`);
+    socket.isRobot = false; // eslint-disarsble-line
     socket.user = user; // eslint-disable-line
   });
   // List rooms
   socket.on('request-room-list', () => {
-    console.log('Requesting room list');
     if (!socket.isRobot && socket.user) {
       console.log('sending room list');
       socket.emit('room-list', Pool.getAvailableRooms(socket.user));
@@ -97,8 +97,9 @@ io.on('connection', (socket) => {
     }
     const room = Pool.getRoomByName(roomName);
     if (room) {
-      room.joinUser(user);
+      room.joinUser(socket.user);
       socket.join(roomName);
+      socket.broadcast.emit('room-list-update');
       console.log(`user joined room: ${roomName}`);
     } else {
       socket.emit('user-join-room-fail', 'Incorrect room name!');
@@ -112,14 +113,19 @@ io.on('connection', (socket) => {
   socket.on('disconnect', () => {
     let room;
     if (socket.isRobot) {
+      console.log(`Robot ${socket.robot.id} leaving`);
       room = Pool.findRobotsRoom(socket.robot);
+      room.leaveRobot();
     } else {
+      console.log(`User ${socket.user.id} leaving`);
       room = Pool.findUsersRoom(socket.user);
+      room.leaveUser();
     }
     if (room && room.isEmpty()) {
       Pool.removeRoomById(room.id);
-      socket.leave(socket.room.name);
     }
+    socket.leave(room.name);
+    socket.broadcast.emit('room-list-update');
   });
 });
 

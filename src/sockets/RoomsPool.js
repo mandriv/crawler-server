@@ -16,21 +16,25 @@ export default class RoomsPool {
   getAvailableRooms = (user) => {
     const availableRooms = [];
     for (const room of this.rooms) {
-      const { robot } = room;
-      const isUserIdMatching = robot.owner.id === user.id;
-      const isUsersInstititionMatching = robot.owner.id === user.institution;
-      if (isUserIdMatching && robot.owner.type === 'User') {
-        availableRooms.push(room);
-      } else if (isUsersInstititionMatching && robot.owner.type === 'Institution') {
-        availableRooms.push(room);
+      if (room.robot && room.robot.owners) {
+        for (const owner of room.robot.owners) {
+          // is user's robot
+          const isUsrs = owner.id === user.id && owner.type === 'User';
+          // or is it institution's that user is part of
+          const isInsts = owner.id === user.institution && owner.type === 'Institution';
+          if (isUsrs || isInsts) {
+            availableRooms.push(room);
+            break;
+          }
+        }
       }
     }
     return availableRooms;
   }
 
-  findUsersRoom = user => this.rooms.find(room => room.user.id === user.id);
+  findUsersRoom = user => this.rooms.find(room => room.user && room.user.id === user.id);
 
-  findRobotsRoom = robot => this.rooms.find(room => room.robot.id === robot.id);
+  findRobotsRoom = robot => this.rooms.find(room => room.robot && room.robot.id === robot.id);
 
   removeRoomById = id => this.rooms.filter(room => room.id !== id);
 
