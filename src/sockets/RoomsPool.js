@@ -36,6 +36,8 @@ export default class RoomsPool {
 
   findRobotsRoom = robot => this.rooms.find(room => room.robot && room.robot.id === robot.id);
 
-  removeRoomById = id => this.rooms.filter(room => room.id !== id);
+  removeRoomById = (id) => {
+    this.rooms = this.rooms.filter(room => room.id !== id);
+  }
 
 }
