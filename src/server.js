@@ -51,7 +51,7 @@ db.once('open', () => {
 app.use('/', apiRouter);
 
 // sockets.io handling
-const Pool = new RoomsPool();
+const pool = new RoomsPool();
 
 io.on('connection', (socket) => {
   // Robot join
@@ -60,12 +60,12 @@ io.on('connection', (socket) => {
     socket.isRobot = true; // eslint-disable-line
     socket.robot = robot; // eslint-disable-line
     const roomName = `control-${robot.id}`;
-    let newRoom = Pool.getRoomByName(roomName);
+    let newRoom = pool.getRoomByName(roomName);
     if (!newRoom) {
       newRoom = new Room(roomName);
     }
     newRoom.joinRobot(robot);
-    Pool.createRoom(newRoom);
+    pool.createRoom(newRoom);
     socket.join(roomName);
     socket.broadcast.emit('room-list-update');
   });
@@ -83,7 +83,7 @@ io.on('connection', (socket) => {
   socket.on('request-room-list', () => {
     if (!socket.isRobot && socket.user) {
       console.log('sending room list');
-      socket.emit('room-list', Pool.getAvailableRooms(socket.user));
+      socket.emit('room-list', pool.getAvailableRooms(socket.user));
     } else {
       console.log('sending error with room list');
       socket.emit('request-room-fail', 'Send \'user-join\' request first!');
@@ -95,10 +95,11 @@ io.on('connection', (socket) => {
       socket.emit('user-join-room-fail', 'Send \'user-join\' request first!');
       return;
     }
-    const room = Pool.getRoomByName(roomName);
+    const room = pool.getRoomByName(roomName);
     if (room) {
       room.joinUser(socket.user);
       socket.join(roomName);
+      socket.room = roomName; // eslint-disable-line
       socket.broadcast.emit('room-list-update');
       console.log(`user joined room: ${roomName}`);
     } else {
@@ -107,24 +108,30 @@ io.on('connection', (socket) => {
   });
   // Send control data
   socket.on('robot-control', (data) => {
+    console.log(socket.room);
+    console.log(data);
     io.sockets.in(socket.room).emit('robot-control', data);
   });
   // Disconnect
   socket.on('disconnect', () => {
     let room;
-    if (socket.isRobot) {
+    if (socket.isRobot && socket.robot && socket.robot.id) {
       console.log(`Robot ${socket.robot.id} leaving`);
-      room = Pool.findRobotsRoom(socket.robot);
-      room.leaveRobot();
-    } else {
+      room = pool.findRobotsRoom(socket.robot);
+      if (room) {
+        room.leaveRobot();
+      }
+    } else if (!socket.isRobot && socket.user && socket.user.id) {
       console.log(`User ${socket.user.id} leaving`);
-      room = Pool.findUsersRoom(socket.user);
-      room.leaveUser();
+      room = pool.findUsersRoom(socket.user);
+      if (room) {
+        room.leaveUser();
+      }
     }
     if (room && room.isEmpty()) {
-      Pool.removeRoomById(room.id);
+      pool.removeRoomById(room.id);
+      socket.leave(room.name);
     }
-    socket.leave(room.name);
     socket.broadcast.emit('room-list-update');
   });
 });
