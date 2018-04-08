@@ -114,9 +114,7 @@ io.on('connection', (socket) => {
   });
   // video stream
   socket.on('video-stream', (data) => {
-    // stream buffer to the individual robot's room
-    console.log('vid-stream data:');
-    console.log(data);
+    // stream buffer to the individual robot's stream room
     io.sockets.in(`stream-${data.robotID}`).emit('video-stream', data.buffer);
   })
   // Disconnect
