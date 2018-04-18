@@ -1,5 +1,5 @@
 {
-  "name": "crawler-server",
+  "name": "crawler-server-core-microservice",
   "version": "1.0.0",
   "description": "",
   "main": "server.js",
