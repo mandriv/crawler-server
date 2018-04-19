@@ -7,9 +7,7 @@ import * as pool from './util/pool';
 
 const app = express();
 const server = http.Server(app);
-const io = new SocketIO(server, {
-  path: '/robot-control',
-});
+const io = new SocketIO(server);
 
 // settings
 app.set('trust proxy', true);
