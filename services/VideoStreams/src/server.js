@@ -11,10 +11,10 @@ const io = new SocketIO(server, {
   path: '/robot-control',
 });
 
-// settings
-app.set('trust proxy', true);
-
 // sockets.io handling
+io.set('destroy upgrade', false);
+io.set('transports', ['websocket']);
+
 io.on('connection', (socket) => {
   // Robot join
   socket.on('robot-join', (robot) => {
@@ -67,6 +67,16 @@ io.on('connection', (socket) => {
     console.log(data); // eslint-disable-line
     io.sockets.in(socket.room).emit('robot-control', data);
   });
+  /*
+  // TODO: Move to separate microservice
+  // video stream
+  socket.on('video-stream', (data) => {
+    // stream buffer to the individual robot's stream room
+    io.sockets.in(`stream-${data.robotID}`).emit('video-stream', data.buffer);
+  });
+  // join video stream room
+  socket.on('join-stream', id => socket.join(id))
+  */
   // Disconnect
   socket.on('disconnect', () => {
     socket.broadcast.emit('room-list-update');
