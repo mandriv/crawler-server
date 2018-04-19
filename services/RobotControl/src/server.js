@@ -65,6 +65,10 @@ io.on('connection', (socket) => {
     console.log(data); // eslint-disable-line
     io.sockets.in(socket.room).emit('robot-control', data);
   });
+  // Video stream
+  socket.on('video-stream', (data) => {
+    console.log(data); // eslint-disable-line
+  });
   // Disconnect
   socket.on('disconnect', () => {
     socket.broadcast.emit('room-list-update');
