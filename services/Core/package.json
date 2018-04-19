@@ -7,7 +7,7 @@
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "nodemon src/server.js --exec babel-node --ignore node_modules/",
     "build": "babel src -d dist",
-    "update": "git fetch --all && git checkout master && git pull && npm run build && pm2 reload core-api"
+    "update": "git fetch --all && git checkout master && git pull && yarn build && pm2 reload core-api"
   },
   "repository": {
     "type": "git",
