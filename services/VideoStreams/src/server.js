@@ -1,22 +1,26 @@
 import http from 'http';
 import express from 'express';
-import WebSocket from 'ws';
+import SocketIO from 'socket.io';
 
 import envCheck from './util/envCheck'; // eslint-disable-line
 
 const app = express();
 const server = http.Server(app);
-const wss = new WebSocket.Server({ server });
+const io = new SocketIO(server);
 
-wss.on('connection', (ws) => {
-  ws.on('video-stream', (data) => {
-    console.log('received data');
-    console.log(data);
+// settings
+app.set('trust proxy', true);
+
+// sockets.io handling
+io.on('connection', (socket) => {
+  // Robot join
+  socket.on('video-stream', (data) => {
+    console.log(data); // eslint-disable-line
   });
 });
 
 // start listnening
 const port = process.env.PORT
 server.listen(port, () => {
-  console.log(`Waiting for video streams on port ${port}!`); // eslint-disable-line
+  console.log(`Ready to receive robot controls on port ${port}!`); // eslint-disable-line
 });
