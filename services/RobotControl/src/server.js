@@ -22,8 +22,17 @@ app.use((req, res, next) => {
 });
 
 // serve VideoStream files
-app.get('/video-frame/:name', (req, res) =>
-  res.sendFile(path.join(__dirname, 'video', req.params.name)));
+app.get('/video-frame/:name', (req, res) => {
+  let filename = false;
+  try {
+    filename = path.join(__dirname, 'video', req.params.name);
+  } catch (err) {
+    return res.status(400);
+  }
+  if (!filename) return res.status(400);
+  return res.sendFile(filename);
+});
+
 
 app.delete('/video-frame/:name', (req, res) => {
   fs.unlink(path.join(__dirname, 'video', req.params.name), (error) => {
