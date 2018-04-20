@@ -6,7 +6,8 @@ import fs from 'fs';
 import path from 'path';
 
 import envCheck from './util/envCheck'; // eslint-disable-line
-import * as pool from './util/pool';
+import RoomsPool from './rooms/RoomsPool';
+import Room from './rooms/Room';
 
 const app = express();
 const server = http.Server(app);
@@ -32,6 +33,8 @@ app.delete('/video-frame/:name', (req, res) => {
 });
 
 // sockets.io handling
+const pool = new RoomsPool();
+
 io.on('connection', (socket) => {
   // Robot join
   socket.on('robot-join', (robot) => {
@@ -39,6 +42,12 @@ io.on('connection', (socket) => {
     socket.isRobot = true; // eslint-disable-line
     socket.robot = robot; // eslint-disable-line
     const roomName = `control-${robot.id}`;
+    let newRoom = pool.getRoomByName(roomName);
+    if (!newRoom) {
+      newRoom = new Room(roomName);
+    }
+    newRoom.joinRobot(robot);
+    pool.createRoom(newRoom);
     socket.join(roomName);
     socket.broadcast.emit('room-list-update');
   });
@@ -65,17 +74,17 @@ io.on('connection', (socket) => {
   // User join room
   socket.on('user-join-room', (roomName) => {
     if (!socket.user) {
-      console.log(`Failed to join room ${roomName} - no user object in request`); // eslint-disable-line
       socket.emit('user-join-room-fail', 'Send \'user-join\' request first!');
       return;
     }
-    if (pool.isValidRoom(roomName)) {
-      socket.room = roomName; // eslint-disable-line
+    const room = pool.getRoomByName(roomName);
+    if (room) {
+      room.joinUser(socket.user);
       socket.join(roomName);
+      socket.room = roomName; // eslint-disable-line
       socket.broadcast.emit('room-list-update');
-      console.log(`user joined room: ${roomName}`); // eslint-disable-line
+      console.log(`user joined room: ${roomName}`);
     } else {
-      console.log(`Failed to join room ${roomName} - Incorrect room name`); // eslint-disable-line
       socket.emit('user-join-room-fail', 'Incorrect room name!');
     }
   });
@@ -100,6 +109,24 @@ io.on('connection', (socket) => {
   });
   // Disconnect
   socket.on('disconnect', () => {
+    let room;
+    if (socket.isRobot && socket.robot && socket.robot.id) {
+      console.log(`Robot ${socket.robot.id} leaving`); // eslint-disable-line
+      room = pool.findRobotsRoom(socket.robot);
+      if (room) {
+        room.leaveRobot();
+      }
+    } else if (!socket.isRobot && socket.user && socket.user.id) {
+      console.log(`User ${socket.user.id} leaving`); // eslint-disable-line
+      room = pool.findUsersRoom(socket.user);
+      if (room) {
+        room.leaveUser();
+      }
+    }
+    if (room && room.isEmpty()) {
+      pool.removeRoomById(room.id);
+      socket.leave(room.name);
+    }
     socket.broadcast.emit('room-list-update');
   });
 });
