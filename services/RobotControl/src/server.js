@@ -78,7 +78,8 @@ io.on('connection', (socket) => {
     const writeStream = fs.createWriteStream(filename);
     stream.pipe(writeStream);
     stream.on('close', () => {
-      console.log('finished writing');
+      socket.emit('video-stream-received')
+      console.log('finished writing, notifying robot');
       console.log(filename);
       io.sockets.in(`video-stream-${data.robotID}`).emit('video-stream', filename);
     });
