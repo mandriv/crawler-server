@@ -1,6 +1,8 @@
 import http from 'http';
 import express from 'express';
 import SocketIO from 'socket.io';
+import ss from 'socket.io-stream';
+import fs from 'fs';
 
 import envCheck from './util/envCheck'; // eslint-disable-line
 import * as pool from './util/pool';
@@ -68,8 +70,15 @@ io.on('connection', (socket) => {
   // Join stream room
   socket.on('video-stream-join', robotID => socket.join(`video-stream-${robotID}`));
   // Video stream in, stream out to room
-  socket.on('video-stream', (data) => {
-    io.sockets.in(`video-stream-${data.robotID}`).emit('video-stream', data.buffer);
+  ss(socket).on('video-stream', (stream, data) => {
+    const milliseconds = new Date().getTime();
+    const { robotID } = data;
+    const filename = `${robotID}_${milliseconds}`;
+    const writeStream = fs.createWriteStream(filename);
+    stream.pipe(writeStream);
+    stream.on('end', () => {
+      io.sockets.in(`video-stream-${data.robotID}`).emit('video-stream', filename);
+    });
   });
   // Disconnect
   socket.on('disconnect', () => {
