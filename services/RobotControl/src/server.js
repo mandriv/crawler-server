@@ -14,6 +14,11 @@ const io = new SocketIO(server);
 
 // settings
 app.set('trust proxy', true);
+app.use((req, res, next) => {
+  res.header('Access-Control-Allow-Origin', '*');
+  res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept');
+  next();
+});
 
 // serve VideoStream files
 app.get('/video-frame/:name', (req, res) =>
