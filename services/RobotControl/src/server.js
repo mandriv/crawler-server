@@ -19,6 +19,13 @@ app.set('trust proxy', true);
 app.get('/video-frame/:name', (req, res) =>
   res.sendFile(path.join(__dirname, 'video', req.params.name)));
 
+app.delete('/video-frame/:name', (req, res) => {
+  fs.unlink(path.join(__dirname, 'video', req.params.name), (error) => {
+    if (error) return res.status(400).json({ error });
+    return res.status(200);
+  });
+});
+
 // sockets.io handling
 io.on('connection', (socket) => {
   // Robot join
