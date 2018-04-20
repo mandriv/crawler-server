@@ -90,7 +90,7 @@ io.on('connection', (socket) => {
     stream.pipe(writeStream);
     writeStream.on('close', () => {
       socket.emit('video-stream-received');
-      io.sockets.in(`video-stream-${data.robotID}`).emit('video-stream', filename);
+      io.sockets.in(`video-stream-${data.robotID}`).emit('video-stream', `${robotID}_${milliseconds}`);
     });
   });
   // Disconnect
