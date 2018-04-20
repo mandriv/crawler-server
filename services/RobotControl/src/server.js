@@ -3,6 +3,7 @@ import express from 'express';
 import SocketIO from 'socket.io';
 import ss from 'socket.io-stream';
 import fs from 'fs';
+import path from 'path';
 
 import envCheck from './util/envCheck'; // eslint-disable-line
 import * as pool from './util/pool';
@@ -14,8 +15,9 @@ const io = new SocketIO(server);
 // settings
 app.set('trust proxy', true);
 
-// serve VideoStream
-app.use(express.static('../public'));
+// serve VideoStream files
+app.get('/video-frame/:name', (req, res) =>
+  res.sendFile(path.join(__dirname, 'video', req.params.name)));
 
 // sockets.io handling
 io.on('connection', (socket) => {
@@ -76,11 +78,11 @@ io.on('connection', (socket) => {
   ss(socket).on('video-stream', (stream, data) => {
     const milliseconds = new Date().getTime();
     const { robotID } = data;
-    const filename = `${robotID}_${milliseconds}`;
+    const filename = path.join(__dirname, 'video', `${robotID}_${milliseconds}`);
     const writeStream = fs.createWriteStream(filename);
     stream.pipe(writeStream);
     writeStream.on('close', () => {
-      socket.emit('video-stream-received')
+      socket.emit('video-stream-received');
       io.sockets.in(`video-stream-${data.robotID}`).emit('video-stream', filename);
     });
   });
