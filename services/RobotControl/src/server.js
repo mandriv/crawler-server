@@ -71,12 +71,15 @@ io.on('connection', (socket) => {
   socket.on('video-stream-join', robotID => socket.join(`video-stream-${robotID}`));
   // Video stream in, stream out to room
   ss(socket).on('video-stream', (stream, data) => {
+    console.log('new stream');
     const milliseconds = new Date().getTime();
     const { robotID } = data;
     const filename = `${robotID}_${milliseconds}`;
     const writeStream = fs.createWriteStream(filename);
     stream.pipe(writeStream);
-    stream.on('end', () => {
+    stream.on('close', () => {
+      console.log('finished writing');
+      console.log(filename);
       io.sockets.in(`video-stream-${data.robotID}`).emit('video-stream', filename);
     });
   });
