@@ -20,7 +20,7 @@ app.use((req, res, next) => {
   next();
 });
 
-app.use('/frames', express.static(path.join(__dirname, 'video'));
+app.use('/frames', express.static(path.join(__dirname, 'video')));
 
 // serve VideoStream files
 app.get('/video-frame/:name', (req, res) =>
