@@ -77,7 +77,7 @@ io.on('connection', (socket) => {
     const filename = `${robotID}_${milliseconds}`;
     const writeStream = fs.createWriteStream(filename);
     stream.pipe(writeStream);
-    stream.on('close', () => {
+    writeStream.on('close', () => {
       socket.emit('video-stream-received')
       console.log('finished writing, notifying robot');
       console.log(filename);
