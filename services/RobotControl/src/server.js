@@ -14,6 +14,9 @@ const io = new SocketIO(server);
 // settings
 app.set('trust proxy', true);
 
+// serve VideoStream
+app.use(express.static('../public'));
+
 // sockets.io handling
 io.on('connection', (socket) => {
   // Robot join
@@ -71,7 +74,6 @@ io.on('connection', (socket) => {
   socket.on('video-stream-join', robotID => socket.join(`video-stream-${robotID}`));
   // Video stream in, stream out to room
   ss(socket).on('video-stream', (stream, data) => {
-    console.log('new stream');
     const milliseconds = new Date().getTime();
     const { robotID } = data;
     const filename = `${robotID}_${milliseconds}`;
@@ -79,8 +81,6 @@ io.on('connection', (socket) => {
     stream.pipe(writeStream);
     writeStream.on('close', () => {
       socket.emit('video-stream-received')
-      console.log('finished writing, notifying robot');
-      console.log(filename);
       io.sockets.in(`video-stream-${data.robotID}`).emit('video-stream', filename);
     });
   });
